@@ -3,3 +3,5 @@ pandas
 datasets
 fastapi
 uvicorn
+wandb
+scikit-learn
