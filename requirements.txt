@@ -7,4 +7,3 @@ wandb
 scikit-learn
 nltk
 transformers
-pickle5
