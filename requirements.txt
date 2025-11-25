@@ -5,3 +5,6 @@ fastapi
 uvicorn
 wandb
 scikit-learn
+nltk
+transformers
+pickle5
