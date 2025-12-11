@@ -8,3 +8,4 @@ scikit-learn
 nltk
 transformers
 pydantic-settings
+httpx
