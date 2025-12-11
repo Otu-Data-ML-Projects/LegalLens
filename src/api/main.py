@@ -80,9 +80,9 @@ app = FastAPI(lifespan=lifespan)
 # Only allowed origins can access, similar to React
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins, # Comes from .env
+    allow_origins=settings.allowed_origins, 
     allow_credentials=True,
-    allow_methods=["POST"], # Only allow POST (Most secure)
+    allow_methods=["*"], # SADECE "POST" DEĞİL, TÜM METODLARA (OPTIONS DAHİL) İZİN VER
     allow_headers=["*"],
 )
 

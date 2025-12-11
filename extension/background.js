@@ -1,0 +1,1 @@
+console.log("LegalLens Background Service Worker Ready");
