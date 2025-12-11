@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     vocab_path: str
     max_len: int = 10000
     allowed_origins: List[str] = ["*"]
+    google_api_key: str = ""
 
     class Config:
         env_file = os.path.join(os.path.dirname(__file__), "../../.env")

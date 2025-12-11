@@ -3,11 +3,12 @@ import os
 import torch
 import pickle
 import json
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from typing import List
+from typing import List, Optional
 
 # --- Configuration ---
 # we import settings from config.py
@@ -94,6 +95,98 @@ class AnalyzeResponse(BaseModel):
     risky_indices: List[int]
     scores: List[float]
 
+class SummarizeRequest(BaseModel):
+    texts: List[str]
+    scores: Optional[List[float]] = None
+
+class SummarizeResponse(BaseModel):
+    summaries: List[str]
+    overall_summary: str
+
+# --- Gemini API Helper ---
+async def summarize_with_gemini(text: str, score: float = 0.0) -> str:
+    """Tek bir riskli maddeyi Gemini ile özetle"""
+    if not settings.google_api_key:
+        return "API key bulunamadı"
+    
+    prompt = f"""Sen bir hukuk uzmanısın. Aşağıdaki Terms & Conditions maddesini Türkçe olarak kısa ve anlaşılır şekilde özetle. 
+Kullanıcının dikkat etmesi gereken riskleri vurgula. Maksimum 2-3 cümle kullan.
+
+Risk Skoru: %{int(score * 100)}
+
+Madde:
+{text[:1000]}
+
+Kısa Özet:"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={settings.google_api_key}",
+                json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "temperature": 0.3,
+                        "maxOutputTokens": 150
+                    }
+                },
+                timeout=30.0
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            else:
+                return f"Özet oluşturulamadı (Hata: {response.status_code})"
+    except Exception as e:
+        return f"Özet hatası: {str(e)}"
+
+async def create_overall_summary(texts: List[str], scores: List[float]) -> str:
+    """Tüm riskli maddelerin genel özetini oluştur"""
+    if not settings.google_api_key:
+        return "API key bulunamadı"
+    
+    # En riskli 5 maddeyi al
+    combined = list(zip(texts, scores))
+    combined.sort(key=lambda x: x[1], reverse=True)
+    top_risks = combined[:5]
+    
+    risk_texts = "\n\n".join([f"[Risk %{int(s*100)}]: {t[:300]}..." for t, s in top_risks])
+    
+    prompt = f"""Sen bir hukuk uzmanısın. Aşağıdaki Terms & Conditions'daki riskli maddeleri analiz et ve kullanıcıya Türkçe olarak genel bir özet sun.
+
+Toplam {len(texts)} riskli madde bulundu. En riskli maddeler:
+
+{risk_texts}
+
+Kullanıcıya hitap ederek:
+1. Bu sözleşmede dikkat edilmesi gereken ana riskler neler?
+2. Kabul etmeden önce ne yapmalı?
+
+Maksimum 4-5 cümle ile özetle:"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={settings.google_api_key}",
+                json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "temperature": 0.4,
+                        "maxOutputTokens": 300
+                    }
+                },
+                timeout=30.0
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            else:
+                return f"Genel özet oluşturulamadı (Hata: {response.status_code})"
+    except Exception as e:
+        return f"Özet hatası: {str(e)}"
+
 # --- Endpoint ---
 @app.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_sentences(payload: AnalyzeRequest):
@@ -119,3 +212,28 @@ async def analyze_sentences(payload: AnalyzeRequest):
                 risky_indices.append(idx)
     
     return {"risky_indices": risky_indices, "scores": scores}
+
+# --- Summarize Endpoint ---
+@app.post("/summarize", response_model=SummarizeResponse)
+async def summarize_risks(payload: SummarizeRequest):
+    """Riskli maddeleri Gemini ile özetle"""
+    if not settings.google_api_key:
+        raise HTTPException(status_code=503, detail="Google API key yapılandırılmamış")
+    
+    if not payload.texts:
+        raise HTTPException(status_code=400, detail="Özetlenecek metin bulunamadı")
+    
+    scores = payload.scores or [0.5] * len(payload.texts)
+    
+    # Her madde için özet oluştur (paralel)
+    import asyncio
+    summary_tasks = [
+        summarize_with_gemini(text, score) 
+        for text, score in zip(payload.texts, scores)
+    ]
+    summaries = await asyncio.gather(*summary_tasks)
+    
+    # Genel özet oluştur
+    overall_summary = await create_overall_summary(payload.texts, scores)
+    
+    return {"summaries": list(summaries), "overall_summary": overall_summary}
