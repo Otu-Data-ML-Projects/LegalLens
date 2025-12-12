@@ -53,7 +53,7 @@ You can inspect each risk individually. The card shows:
 ### 4. Complete Workflow
 The extension provides a non-intrusive experience, overlaying critical information directly onto the document context without disrupting readability.
 
-![Workflow View](extension/icons/workflow.jpg)
+![Workflow View](extension/icons/workflow.jpeg)
 *Combined view of the document highlighting and the AI assistant popup.*
 
 ---
