@@ -8,19 +8,55 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
 ![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-yellow)
 
-## 📖 Project Overview
-
 **LegalLens** is an intelligent tool designed to analyze long and complex "Terms and Conditions" (T&C) agreements. Instead of reading thousands of words, users can instantly identify "unfair" or "risky" clauses hidden in the fine print.
 
-This project implements an **Extractive Summarization** approach using a custom **Bi-Directional LSTM with Attention Mechanism** to assign importance scores to sentences based on their potential risk to the user.
+This project implements a **Hybrid AI Architecture**:
+1.  **Detection:** A custom **Bi-Directional LSTM with Attention Mechanism** identifies potentially risky sentences.
+2.  **Explainability:** **Google Gemini API** generates simplified, human-readable summaries of these risks.
 
 ### ✨ Key Features
 
 * 🔍 **Intelligent Risk Detection** - Automatically identifies potentially unfair clauses in legal documents
 * 🧠 **Deep Learning Model** - Custom Bi-LSTM with Attention mechanism trained on legal text
+* 📝 **Explainable AI (XAI)** - Translates complex legal jargon into simple summaries using Gemini
 * ⚡ **Real-time Analysis** - Fast processing through optimized FastAPI backend
 * 🌐 **Browser Integration** - Chrome extension for seamless webpage analysis
 * 📊 **Sentence-level Scoring** - Detailed risk scores for each clause
+
+---
+
+## 📸 How It Works (Demo)
+
+LegalLens operates seamlessly in your browser to protect your digital rights.
+
+### 1. Seamless Integration & Detection
+As soon as you open a Terms & Conditions page (e.g., Spotify), LegalLens is ready. Upon analysis, our **Bi-LSTM model** scans the text in real-time and **highlights risky clauses in red** directly on the webpage.
+
+![Risk Highlighting](extension/icons/painted_by_red.png)
+*Real-time risk detection and highlighting on the webpage.*
+
+### 2. AI-Powered General Overview
+Clicking the LegalLens button opens the smart dashboard. **Google Gemini AI** analyzes the detected risks and provides a "General Assessment" in plain language, summarizing the overall danger level.
+
+![General Overview](extension/icons/risky_parts.png)
+*The dashboard provides a high-level summary and total risk count.*
+
+### 3. Detailed Clause Analysis & Navigation
+You can inspect each risk individually. The card shows:
+* **Risk Score:** The model's confidence level (e.g., Risk: %96).
+* **AI Summary:** A simplified explanation of the specific legal jargon.
+* **Navigation:** The **"Bu maddeye git"** button automatically scrolls the page to the exact location of the risky clause.
+
+![Detailed View](extension/icons/full_part.png)
+*Detailed breakdown of specific clauses with AI-generated explanations.*
+
+### 4. Complete Workflow
+The extension provides a non-intrusive experience, overlaying critical information directly onto the document context without disrupting readability.
+
+![Workflow View](extension/icons/workflow.jpg)
+*Combined view of the document highlighting and the AI assistant popup.*
+
+---
 
 ## 🎯 Project Goals
 
