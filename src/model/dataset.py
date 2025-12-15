@@ -8,17 +8,14 @@ class LegalDataset(Dataset):
         self.labels = labels
         self.max_len = max_len
         
-        # If no vocab is given (Train phase), create it
         if vocab is None:
             self.vocab = self.build_vocab(texts)
         else:
             self.vocab = vocab
             
     def build_vocab(self, texts, max_vocab=10000):
-        # Simple word vocabulary builder
         all_words = [word.lower() for text in texts for word in text.split()]
         word_counts = Counter(all_words)
-        # Take the most common words, 0=Padding, 1=Unknown
         vocab = {"<PAD>": 0, "<UNK>": 1}
         for word, _ in word_counts.most_common(max_vocab):
             vocab[word] = len(vocab)
@@ -29,11 +26,10 @@ class LegalDataset(Dataset):
         for word in text.split():
             indices.append(self.vocab.get(word.lower(), self.vocab["<UNK>"]))
         
-        # Padding or Truncating (Make fixed size)
         if len(indices) < self.max_len:
-            indices += [0] * (self.max_len - len(indices)) # Pad
+            indices += [0] * (self.max_len - len(indices))
         else:
-            indices = indices[:self.max_len] # Truncate
+            indices = indices[:self.max_len]
             
         return torch.tensor(indices, dtype=torch.long)
 
@@ -44,7 +40,6 @@ class LegalDataset(Dataset):
         text = self.texts[idx]
         label = self.labels[idx]
         
-        # Fix label format: [1] -> 1.0, [] -> 0.0
         is_risky = 1.0 if len(label) > 0 else 0.0
         
         return {
