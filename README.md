@@ -201,8 +201,6 @@ LegalLens/
 
 ## 🤝 Contributing
 
-This is an academic project, but suggestions and improvements are welcome!
-
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
@@ -218,9 +216,11 @@ This is an academic project, but suggestions and improvements are welcome!
 **Project Scope:** Ostim Technical University - Neural Networks Course  
 **Repository:** [https://github.com/Otu-Data-ML-Projects/LegalLens](https://github.com/Otu-Data-ML-Projects/LegalLens)
 
-## 📝 License
+## 📄 License
 
-This project is developed for educational purposes as part of the Neural Networks course at Ostim Technical University.
+This project is licensed under the **GNU AGPLv3** license.
+You cannot use this software as part of a commercial product in a closed-source manner.
+For details, please refer to the `LICENSE` file.
 
 ## 🙏 Acknowledgments
 
