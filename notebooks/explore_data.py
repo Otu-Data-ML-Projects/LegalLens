@@ -49,5 +49,18 @@ def analyze_dataset():
     print(f"Text: {risky_example['text']}")
     print(f"Label: {risky_example['labels']}")
 
+    print("\n--- 💾 SAVING DATASET TO CSV ---")
+    # Loop through all dataset splits (Train, Validation, Test) and save them
+    for split in dataset.keys():
+        # Convert to Pandas DataFrame
+        split_df = dataset[split].to_pandas()
+        
+        # Create filename (e.g., lexglue_train.csv)
+        filename = f"lexglue_{split}.csv"
+        
+        # Save as CSV
+        split_df.to_csv(filename, index=False)
+        print(f"✅ {filename} successfully created!")
+
 if __name__ == "__main__":
     analyze_dataset()
